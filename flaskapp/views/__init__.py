@@ -1,1 +1,1 @@
-from . import *
+from .index import Index
