@@ -9,7 +9,7 @@ import os
 import sys
 
 from run import app, custom_config
-import logging
+# import logging
 
 # logging.basicConfig(
 #     filename=r'c:\Temp\flask-service.log',
@@ -32,7 +32,7 @@ class FlaskSvc(win32serviceutil.ServiceFramework):
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.hWaitStop)
         self.ReportServiceStatus(win32service.SERVICE_STOPPED)
-        logging.info('Stopped service ...')
+        app.logger.info('Stopped service ...')
         self.stop_requested = True
 
     def SvcDoRun(self):
