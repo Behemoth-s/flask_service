@@ -6,8 +6,8 @@ import sys
 import json
 
 # set logger
-logging.basicConfig(filename='C:\\Temp\\flask_service.log', level=logging.DEBUG,
-                    format='[flaskapp] %(levelname)-7.7s %(message)s')
+logging.basicConfig(filename='C:\\Temp\\flask-service.log', level=logging.DEBUG,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # create app
 app = Flask(__name__)
@@ -28,8 +28,18 @@ def resource_path(relative_path):
 
 custom_config_file = resource_path('custom_config.json')
 if os.path.isfile(custom_config_file):
-    app.logger.info('load custom config from file {}'.format(custom_config_file))
+    app.logger.info(
+        'load custom config from file {}'.format(custom_config_file))
     custom_config = json.load(open(resource_path('custom_config.json')))
 else:
-    app.logger.error('custom config file {} not found'.format(custom_config_file))
+    app.logger.error(
+        'custom config file {} not found'.format(custom_config_file))
+    import inspect
+
+    path = inspect.currentframe().f_globals.get('__path__')
+    app.logger.info('inspect path {}'.format(path))
+    app.logger.info('sys argv {}'.format(str(sys.argv)))
+
+    app.logger.info('sys excutable {}'.format(str(sys.executable)))
+    app.logger.info('sys keys {}'.format(str(sys.__dict__.keys())))
     custom_config = {}

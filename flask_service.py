@@ -9,14 +9,14 @@ import os
 import sys
 
 from run import app, custom_config
-# import logging
+import logging
 
-# logging.basicConfig(
-#     filename=r'c:\Temp\flask-service.log',
-#     level=logging.INFO,
-#     format='[flaskapp] %(levelname)-7.7s %(message)s'
-# )
-
+logging.basicConfig(
+    filename=r'c:\Temp\flask-service.log',
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logging.getLogger('flaskapp.sub')
 
 class FlaskSvc(win32serviceutil.ServiceFramework):
     _svc_name_ = "FlaskService"
@@ -32,7 +32,7 @@ class FlaskSvc(win32serviceutil.ServiceFramework):
         self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
         win32event.SetEvent(self.hWaitStop)
         self.ReportServiceStatus(win32service.SERVICE_STOPPED)
-        app.logger.info('Stopped service ...')
+        logging.info('Stopped service ...')
         self.stop_requested = True
 
     def SvcDoRun(self):
@@ -45,7 +45,8 @@ class FlaskSvc(win32serviceutil.ServiceFramework):
         self.main()
 
     def main(self):
-        app.run(host=custom_config.get('host', '0.0.0.0'), port=custom_config.get('port', 5008))
+        app.run(host=custom_config.get('host', '0.0.0.0'),
+                port=custom_config.get('port', 5008))
 
 
 if __name__ == '__main__':
