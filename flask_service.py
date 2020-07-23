@@ -2,6 +2,7 @@ import win32serviceutil
 import win32service
 import win32event
 import win32evtlogutil
+import win32timezone
 import servicemanager
 import socket
 import time
