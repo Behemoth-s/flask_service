@@ -3,9 +3,9 @@
 block_cipher = None
 
 
-a = Analysis(['win32_service.py'],
-             pathex=['C:\\Personal\\Python37\\Lib\\site-packages'],
-             datas=[('C:\\Personal\\project\\ethylene_scheduling\\custom_config.json','.')],
+a = Analysis(['flask_service.py'],
+             pathex=['C:\\Personal\\MiniConda\\envs\\flask_service\\Libsite-packages'],
+             datas=[('C:\\Personal\\project\\flask_service\\custom_config.json','.')],
              hiddenimports=['win32timezone',
                             'altgraph',
                             'Click'
@@ -36,7 +36,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='ethylene_scheduling_service',
+          name='flask_service',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
