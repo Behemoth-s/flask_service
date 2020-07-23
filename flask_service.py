@@ -11,12 +11,6 @@ import sys
 from run import app, custom_config
 import logging
 
-logging.basicConfig(
-    filename=r'c:\Temp\flask-service.log',
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logging.getLogger('flaskapp.sub')
 
 class FlaskSvc(win32serviceutil.ServiceFramework):
     _svc_name_ = "FlaskService"
@@ -41,12 +35,12 @@ class FlaskSvc(win32serviceutil.ServiceFramework):
             servicemanager.PYS_SERVICE_STARTED,
             (self._svc_name_, '')
         )
-
+        logging.info('start service ...')
         self.main()
 
     def main(self):
         app.run(host=custom_config.get('host', '0.0.0.0'),
-                port=custom_config.get('port', 5008))
+                port=custom_config.get('port', 5001))
 
 
 if __name__ == '__main__':
