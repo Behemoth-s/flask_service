@@ -253,7 +253,7 @@ Python Service的运行机理不同于一般的python程序，它并非运行在
 
 因为，Service已经被安装，`start`在这里直接通过Windows Service Manager来启动服务。
 
-`Flask Service`在Windows Service Manager内注册的程序正好是`PythonService.exe`，至于`PythonService.exe`是如何定位到项目代码的将在后面说明
+`Flask Service`在Windows Service Manager内注册的程序正好是`PythonService.exe`，而`PythonService.exe`定位到项目路径则是通过注册表实现。
 
 ![image-20200723163152914](C:\Personal\project\flask_service\fig\image-20200723163152914.png)
 
@@ -372,7 +372,7 @@ def InstallService(pythonClassString, serviceName, displayName, startType = None
 
    `serviceName:FlaskService`为服务名称
 
-   通过注册表绑定了服务和项目
+   通过注册表绑定了服务和项目代码
 
 ```python
 '''
@@ -391,4 +391,10 @@ def InstallPythonClassString(pythonClassString, serviceName):
 ```
 
 ## PyInstaller 发布
+
+直接使用`PyInstaller`打包
+
+```
+
+```
 
