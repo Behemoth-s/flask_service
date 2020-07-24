@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
 ### Service 使用
 
-Windows Service需要管理员权限操作，启动Service之前需要安装Service
+Windows Service需要管理员权限操作，启动服务之前需要先安装
 
 - 安装`Flask Service`
 
@@ -220,7 +220,7 @@ Windows Service需要管理员权限操作，启动Service之前需要安装Serv
   python flask_service.py remove
   ```
 
-## Python Service的原理
+## Python Service
 
 Python Service的运行机理不同于一般的python程序，它并非运行在Python Interpreter之下，而是在加载之后由`PythonService.exe`执行。这种情况下主要有两个问题。由于无法插入断点，Debug运行时异常将会变得困难，需要借助日志进行排查。另一个是运行时路径和环境变量会发生变化，无法使用相对路径来定位，这点会在之后详细说明。
 
@@ -392,9 +392,15 @@ def InstallPythonClassString(pythonClassString, serviceName):
 
 ## PyInstaller 发布
 
-直接使用`PyInstaller`打包
+可以直接使用`PyInstaller`打包
 
+```shell
+pyinstaller flask_service.py
 ```
 
-```
+程序运行结束后，会生成`flask_service.spec`文件、`build`和`dist`文件夹。
+
+`PyInstaller`会自动加载项目依赖，但
+
+## 路径
 

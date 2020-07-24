@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['flask_service.py'],
-             pathex=['C:\\Personal\\MiniConda\\envs\\flask_service\\Libsite-packages'],
+             pathex=['C:\\Personal\\MiniConda\\envs\\flask_service\\Lib\\site-packages'],
              datas=[('C:\\Personal\\project\\flask_service\\custom_config.json','.')],
              hiddenimports=['win32timezone',
                             'altgraph',
