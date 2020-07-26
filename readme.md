@@ -392,6 +392,8 @@ def InstallPythonClassString(pythonClassString, serviceName):
 
 ## PyInstaller 发布
 
+### 生成spec文件
+
 可以直接使用`PyInstaller`打包
 
 ```shell
@@ -400,7 +402,190 @@ pyinstaller flask_service.py
 
 程序运行结束后，会生成`flask_service.spec`文件、`build`和`dist`文件夹。
 
-`PyInstaller`会自动加载项目依赖，但
+`PyInstaller`会自动加载项目依赖，然后进行编译和打包，但对于隐式的依赖关系，`PyInstaller`并不能处理，因此需要手动添加。
+
+### 修改spec文件
+
+将生成后的`flask_service.spec`复制并重命名为`local_service.spec`,重命名是为了防止运行`pyinstaller flask_service.py`后被覆盖，其内容大致如下
+
+```python
+# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+
+a = Analysis(['flask_service.py'],
+             pathex=['C:\\Personal\\project\\flask_service'],
+             binaries=[],
+             datas=[],
+             hiddenimports=[],
+             hookspath=[],
+             runtime_hooks=[],
+             excludes=[],
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             cipher=block_cipher,
+             noarchive=False)
+pyz = PYZ(a.pure, a.zipped_data,
+             cipher=block_cipher)
+exe = EXE(pyz,
+          a.scripts,
+          [],
+          exclude_binaries=True,
+          name='flask_service',
+          debug=False,
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=True,
+          console=True )
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               upx_exclude=[],
+               name='flask_service')
+
+```
+
+修改`Analysis.pathex`字段，添加当前Python环境的`Lib\site-packages`目录
+
+```Python
+pathex=['C:\\Personal\\project\\flask_service','C:\\Personal\\MiniConda\\envs\\flask_service\\Lib\\site-packages']
+```
+
+修改`Analysis.datas`字段，添加需要的文件，例如`config.json`，`datas`格式为元组列表，传入文件的绝对路径和发布后的相对路径。相对路径`.`即编译之后的主路径，在默认情况下位于`dist\flask_service`
+
+```
+datas=[('C:\\Personal\\project\\flask_service\\custom_config.json','.')]
+```
+
+修改`Analysis.hiddenimports`，添加隐式的依赖，`flask`需要的依赖大致如下
+
+```python
+hiddenimports=['win32timezone',
+                'altgraph',
+                'Click'
+                'Flask',
+                'future',
+                'itsdangerous',
+                'flask_restful',
+                'Jinja2',
+                'macholib',
+                'MarkupSafe',
+                'pefile',
+                'PyInstaller',
+                'pyodbc',
+                'pywin32',
+                'pywin32-ctypes',
+                'Werkzeug'
+                ],
+```
+
+在引入了其他依赖时，如果在运行过程中出现缺少依赖的提示，一并添加即可。
+
+### 编译发布
+
+将修改后的`spec`使用`PyInstaller`编译发布即可。
+
+```
+python -m PyInstaller local_service.spec
+```
+
+发布生成目录在`dist\flask_service`，将该目录复制拷贝到其他计算机运行即可。
+
+### 服务管理
+
+服务的管理需要计算机管理员权限，需要使用管理员启动命令行或者PyCharm
+
+- 安装
+
+  ```shell
+  .\dist\flask_service\flask_service.exe install
+  ```
+
+- 启动
+
+  ```
+  .\dist\flask_service\flask_service.exe start
+  ```
+
+- 卸载
+
+  ```
+  .\dist\flask_service\flask_service.exe remove
+  ```
+
+还可以使用windows系统组件-服务来进行管理，并设置自动启动。
+
+![image-20200726113135115](C:\Users\liukai\AppData\Roaming\Typora\typora-user-images\image-20200726113135115.png)
 
 ## 路径
 
+在使用用户`config`文件时，不可避免的需要读取文件。在本项目中，出于不同层次的调试目的，会涉及到三种方式来启动`Flask App`。
+
+1. 使用`run.py`启动
+
+   ```shell
+   python run.py
+   ```
+
+2. 使用`flask_service.py`作为服务，在`PythonService.exe`中启动
+
+   ```shell
+   python flask_service.py install
+   python flask_service.py start
+   ```
+
+3. 使用`PyInstaller`编译之后启动
+
+   ```
+   python -m PyInstaller local.spec
+   .\dist\flask_service\flask_service.exe install
+   .\dist\flask_service\flask_service.exe start
+   ```
+
+由于程序的入口的不同，这三种方式启动后的工作目录也会不同，这会对目录文件的定位造成影响。
+
+使用`os.path.abspath('.')`来获取相对地址，对应三种方式内的返回地址分别如下：
+
+```python
+"C:\\Personal\\project\\flask_service" # run.py
+"C:\\Personal\\MiniConda\\envs\\ethylene_scheduling\\Lib\\site-packages\win32" # flask_service.py
+"C:\\Windows\\System32"  # PyInstaller
+```
+
+`run.py`是一个普通python脚本方式运行，所以目录对应了脚本所在目录；`flask_service.py`是由`PythonService.exe`启动的，所以对应了`PythonService.exe`的目录；而`PyInstaller`编译后的文件作为系统服务启动，目录默认定位在`C:\Windows\System32`。
+
+为了保证在不同场景下都能够获取到正确的相对目录，使用`inspect`来获取代码所在目录。
+
+```python
+import os
+import inspect
+os.path.dirname(inspect.currentframe().f_globals.get('__file__'))
+```
+
+需要注意的是，示例`inspect`获取的是当前代码文件所在的目录，即便目录编译后不显式存在。
+
+在`run.py`插入示例代码，则返回目录分别如下
+
+```python
+"C:\\Personal\\project\\flask_service" # run.py
+"C:\\Personal\\project\\flask_service" # flask_service.py
+"C:\\Personal\\project\\dist\\flask_service"  # PyInstaller
+```
+
+而在`flaskapp\__init__.py`插入同样代码，则分别会返回	
+
+```python
+"C:\\Personal\\project\\flask_service\\flaskapp" # run.py
+"C:\\Personal\\project\\flask_service\\flaskapp" # flask_service.py
+"C:\\Personal\\project\\dist\\flask_service\\flaskapp"  # PyInstaller
+```
+
+但是经过PyInstaller编译之后，flaskapp目录已经不存在
+
+![image-20200726150831857](C:\Users\liukai\AppData\Roaming\Typora\typora-user-images\image-20200726150831857.png)
+
+所以在使用`inspect`定位相对目录时，最好使用项目根目录。
