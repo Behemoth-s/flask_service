@@ -519,7 +519,7 @@ python -m PyInstaller local_service.spec
 
 还可以使用windows系统组件-服务来进行管理，并设置自动启动。
 
-![image-20200726113135115](C:\Users\liukai\AppData\Roaming\Typora\typora-user-images\image-20200726113135115.png)
+![image-20200726113135115](fig\image-20200726113135115.png)
 
 ## 路径
 
@@ -586,6 +586,6 @@ os.path.dirname(inspect.currentframe().f_globals.get('__file__'))
 
 但是经过PyInstaller编译之后，flaskapp目录已经不存在
 
-![image-20200726150831857](C:\Users\liukai\AppData\Roaming\Typora\typora-user-images\image-20200726150831857.png)
+![image-20200726150831857](fig\image-20200726150831857.png)
 
 所以在使用`inspect`定位相对目录时，最好使用项目根目录。
