@@ -3,6 +3,7 @@ import inspect
 import os
 import json
 
+# 读取config
 work_folder = os.path.dirname(inspect.currentframe().f_globals.get('__file__'))
 app.logger.info('loading custom config from {}'.format(work_folder))
 with open(os.path.join(work_folder, 'custom_config.json'), 'r') as fp:
